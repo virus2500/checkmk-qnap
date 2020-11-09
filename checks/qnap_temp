@@ -1,0 +1,92 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+# +------------------------------------------------------------------+
+# |             ____ _               _        __  __ _  __           |
+# |            / ___| |__   ___  ___| | __   |  \/  | |/ /           |
+# |           | |   | '_ \ / _ \/ __| |/ /   | |\/| | ' /            |
+# |           | |___| | | |  __/ (__|   <    | |  | | . \            |
+# |            \____|_| |_|\___|\___|_|\_\___|_|  |_|_|\_\           |
+# |                                                                  |
+# | Copyright Mathias Kettner 2010             mk@mathias-kettner.de |
+# +------------------------------------------------------------------+
+#
+# This file is part of Check_MK.
+# The official homepage is at http://mathias-kettner.de/check_mk.
+#
+# check_mk is free software;  you can redistribute it and/or modify it
+# under the  terms of the  GNU General Public License  as published by
+# the Free Software Foundation in version 2.  check_mk is  distributed
+# in the hope that it will be useful, but WITHOUT ANY WARRANTY;  with-
+# out even the implied warranty of  MERCHANTABILITY  or  FITNESS FOR A
+# PARTICULAR PURPOSE. See the  GNU General Public License for more de-
+# ails.  You should have  received  a copy of the  GNU  General Public
+# License along with GNU Make; see the file  COPYING.  If  not,  write
+# to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
+# Boston, MA 02110-1301 USA.
+
+# Author: Andre Eckstein <Andre.Eckstein@Bechtle.com>
+# updated by Christian Burmeister 10/2015
+# updated by Michael Kronika 04/2020
+
+factory_settings["qnap_temp_default_levels"] = {
+    "cpuTemp": (55, 60),
+    "sysTemp": (55, 60)
+}
+
+def inventory_qnap_temp(info):
+
+    inventory = []
+    if "C/" in  info[0][0]:
+        inventory.append(("Temperature System", "", "qnap_temp_default_levels" ))
+    if "C/" in  info[0][1]:
+        inventory.append(("Temperature CPU", "", "qnap_temp_default_levels" ))
+    return inventory
+
+def check_qnap_temp(item, params, info):
+
+    for line in info:
+        if item == "Temperature System":
+            temp = info[0][0]
+            if type(params.get('sysTemp')) is tuple:
+                warn, crit = params.get('sysTemp', (0, 0))
+            else:
+                # old config
+                warn, crit = params["sysTemp"]
+        elif item == "Temperature CPU":
+            temp = info[0][1]
+            if type(params.get('cpuTemp')) is tuple:
+                warn, crit = params.get('cpuTemp', (0, 0))
+            else:
+                # old config
+                warn, crit = params["cpuTemp"]
+
+        temp = temp.split("/")
+        temp = temp[0]
+        temp = temp.rsplit(" C")
+        temp = int(temp[0])
+
+        perfdata = [("temp", temp, warn, crit)]
+        infotext = " %s is at %sC (levels at %s/%s)" % ( item, temp, warn, crit )
+
+        if temp >= crit:
+            return (2, "Critical - " + infotext, perfdata )
+        elif temp >= warn:
+            return (1, "Warning - " + infotext, perfdata )
+        else:
+            return (0, "OK - " + infotext, perfdata)
+    return (3, "UNKNOWN", [])
+
+
+check_info['qnap_temp'] = {
+    "check_function"          : check_qnap_temp,
+    "inventory_function"      : inventory_qnap_temp,
+    "group"                   : "qnap_temp",
+    "default_levels_variable" : "qnap_temp_default_levels",
+    "service_description"     : "QNAP %s",
+    "has_perfdata"            : True,
+    "snmp_info"               : ( ".1.3.6.1.4.1.24681.1.2", [
+                                   5, # CPUTemp
+                                   6, # SYSTemp
+                                ] ),
+    "snmp_scan_function"      : lambda oid: "QNAP Systems" in oid('.1.3.6.1.2.1.47.1.1.1.1.12.1')
+}
