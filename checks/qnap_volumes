@@ -35,15 +35,15 @@ def inventory_qnap_volumes(info):
 
 def check_qnap_volumes(item, _no_params, info):
     for volid, volstate, fstype, arrayinfo in info:
-        arrayinfo = arrayinfo.lstrip("[")
-        arrayinfo = arrayinfo.rstrip("]")
-        infotext = " Volume state is %s, Filesystem type is %s, %s" % (volstate, fstype, arrayinfo)
         if volid == item:
+            arrayinfo = arrayinfo.lstrip("[")
+            arrayinfo = arrayinfo.rstrip("]")
+            infotext = " Volume state is %s, Filesystem type is %s, %s" % (volstate, fstype, arrayinfo)
             if volstate == "Ready":
                 return (0, "OK - " + infotext )
             elif volstate == "Rebuilding...":
                 return (1, "Warning - " + infotext )
-        else:
+            else:
                 return (2, "Critical - " + infotext)
     return (3, "UNKNOWN - Volume")
 
