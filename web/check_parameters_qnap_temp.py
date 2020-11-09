@@ -3,7 +3,7 @@ subgroup_applications = _("Temperature, Humidity, Electrical Parameters, etc.")
 register_check_parameters(
     subgroup_applications,
     "qnap_temp",
-    _("Parameters for QNAP Fans"),
+    _("Parameters for QNAP Temperature"),
     Dictionary(
         elements = [
             ('cpuTemp', Tuple(
