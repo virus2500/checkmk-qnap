@@ -9,5 +9,5 @@ dist({
     'name': 'qnap',
     'title': 'Check Qnap Storage',
     'version': '1.4.4',
-    'version.min_required': '1.6.0p1',
+    'version.min_required': '1.6.0',
 })
