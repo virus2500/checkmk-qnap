@@ -37,28 +37,28 @@ def inventory_qnap_temp(info):
 
     inventory = []
     if "C/" in  info[0][0]:
-        inventory.append(("Temperature System", "", "qnap_temp_default_levels" ))
-    if "C/" in  info[0][1]:
         inventory.append(("Temperature CPU", "", "qnap_temp_default_levels" ))
+    if "C/" in  info[0][1]:
+        inventory.append(("Temperature System", "", "qnap_temp_default_levels" ))
     return inventory
 
 def check_qnap_temp(item, params, info):
 
     for line in info:
-        if item == "Temperature System":
+        if item == "Temperature CPU":
             temp = info[0][0]
-            if type(params.get('sysTemp')) is tuple:
-                warn, crit = params.get('sysTemp', (0, 0))
-            else:
-                # old config
-                warn, crit = params["sysTemp"]
-        elif item == "Temperature CPU":
-            temp = info[0][1]
             if type(params.get('cpuTemp')) is tuple:
                 warn, crit = params.get('cpuTemp', (0, 0))
             else:
                 # old config
                 warn, crit = params["cpuTemp"]
+        elif item == "Temperature System":
+            temp = info[0][1]
+            if type(params.get('sysTemp')) is tuple:
+                warn, crit = params.get('sysTemp', (0, 0))
+            else:
+                # old config
+                warn, crit = params["sysTemp"]
 
         temp = temp.split("/")
         temp = temp[0]
