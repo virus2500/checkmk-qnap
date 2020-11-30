@@ -8,6 +8,6 @@ dist({
     'download_url': 'https://github.com/virus2500/checkmk-qnap',
     'name': 'qnap',
     'title': 'Check Qnap Storage',
-    'version': '1.4.5-alpha1',
+    'version': '1.4.5',
     'version.min_required': '1.6.0',
 })
